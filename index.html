@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Minseon Web Server</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css"
+    />
+    <style>
+      :root {
+        --primary-color: #1d1d1f;
+        --primary-color-hover: #1d1d1f;
+        --primary-color-disabled: #d1d1d6;
+
+        --background-color: #f5f5f7;
+        --text-color: #1d1d1f;
+        --section-background-color: #ffffff;
+        --section-box-shadow: rgba(0, 0, 0, 0.1);
+        --input-background-color: #f5f5f7;
+        --input-border-color: #d1d1d6;
+      }
+
+      body {
+        font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI",
+          Roboto, "Helvetica Neue", Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      .copy-right {
+        position: absolute;
+        bottom: 5px;
+        font-size: 10px;
+        color: var(--text-color);
+      }
+      h1 {
+        font-size: 18px;
+        color: var(--text-color);
+      }
+      .section {
+        background: var(--section-background-color);
+        padding: 20px;
+        box-shadow: 0 2px 4px var(--section-box-shadow);
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 600px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .section h2 {
+        font-size: 20px;
+        margin-bottom: 10px;
+        color: var(--text-color);
+        align-self: flex-start;
+      }
+      label {
+        display: flex;
+        font-weight: 600;
+        color: var(--text-color);
+      }
+      input[type="text"] {
+        flex: 1;
+        display: flex;
+        padding: 4px;
+        border: 1px solid var(--input-border-color);
+        font-size: 12px;
+        background-color: var(--input-background-color);
+        color: var(--text-color);
+        cursor: pointer;
+      }
+      button {
+        width: 150px; /* Fixed button width */
+        padding: 8px 0; /* Fixed button height */
+        margin-right: 10px;
+        border: none;
+        background-color: var(--primary-color);
+        color: #fff;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s, box-shadow 0.3s;
+      }
+      button:hover {
+        background-color: var(--primary-color-hover);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+      button:disabled {
+        background-color: var(--primary-color-disabled);
+        cursor: not-allowed;
+      }
+      button:last-child {
+        margin-right: 0;
+      }
+      .button-group {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        gap: 8px;
+      }
+      .button-group button {
+        flex: 1;
+      }
+      .button-group button:last-child {
+        margin-right: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Configure Servers</h1>
+    <div class="section">
+      <h2>App Server</h2>
+      <div class="button-group">
+        <label for="app-path">Select Folder</label>
+        <input type="text" id="app-path" name="appPath" required readonly />
+      </div>
+      <div class="button-group">
+        <button type="button" id="start-app-server">Start Server</button>
+        <button type="button" id="stop-app-server">Stop Server</button>
+        <button type="button" id="open-app-browser">Open Browser</button>
+      </div>
+    </div>
+    <div class="section">
+      <h2>Storybook Server</h2>
+      <div class="button-group">
+        <label for="storybook-path">Select Folder</label>
+        <input
+          type="text"
+          id="storybook-path"
+          name="storybookPath"
+          required
+          readonly
+        />
+      </div>
+      <div class="button-group">
+        <button type="button" id="start-storybook-server">Start Server</button>
+        <button type="button" id="stop-storybook-server">Stop Server</button>
+        <button type="button" id="open-storybook-browser">Open Browser</button>
+      </div>
+    </div>
+    <p class="copy-right">©minseon</p>
+    <script>
+      const { ipcRenderer } = require("electron");
+
+      document.getElementById("app-path").addEventListener("click", () => {
+        ipcRenderer.invoke("select-folder").then((result) => {
+          if (!result.canceled) {
+            document.getElementById("app-path").value = result.filePaths[0];
+          }
+        });
+      });
+
+      document
+        .getElementById("storybook-path")
+        .addEventListener("click", () => {
+          ipcRenderer.invoke("select-folder").then((result) => {
+            if (!result.canceled) {
+              document.getElementById("storybook-path").value =
+                result.filePaths[0];
+            }
+          });
+        });
+
+      document
+        .getElementById("start-app-server")
+        .addEventListener("click", () => {
+          const appPath = document.getElementById("app-path").value;
+          ipcRenderer.send("start-server", {
+            name: "app",
+            path: appPath,
+            port: 5173,
+          });
+        });
+
+      document
+        .getElementById("start-storybook-server")
+        .addEventListener("click", () => {
+          const storybookPath = document.getElementById("storybook-path").value;
+          ipcRenderer.send("start-server", {
+            name: "storybook",
+            path: storybookPath,
+            port: 6006,
+          });
+        });
+
+      document
+        .getElementById("stop-app-server")
+        .addEventListener("click", () => {
+          ipcRenderer.send("stop-server", "app");
+        });
+
+      document
+        .getElementById("stop-storybook-server")
+        .addEventListener("click", () => {
+          ipcRenderer.send("stop-server", "storybook");
+        });
+
+      document
+        .getElementById("open-app-browser")
+        .addEventListener("click", () => {
+          ipcRenderer.send("open-browser", "http://localhost:5173");
+        });
+
+      document
+        .getElementById("open-storybook-browser")
+        .addEventListener("click", () => {
+          ipcRenderer.send("open-browser", "http://localhost:6006");
+        });
+    </script>
+  </body>
+</html>
