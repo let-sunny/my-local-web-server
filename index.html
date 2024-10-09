@@ -149,7 +149,7 @@
       const { ipcRenderer } = require("electron");
 
       document.getElementById("app-path").addEventListener("click", () => {
-        ipcRenderer.invoke("select-folder").then((result) => {
+        ipcRenderer.invoke("select-folder", "app").then((result) => {
           if (!result.canceled) {
             document.getElementById("app-path").value = result.filePaths[0];
           }
@@ -159,7 +159,7 @@
       document
         .getElementById("storybook-path")
         .addEventListener("click", () => {
-          ipcRenderer.invoke("select-folder").then((result) => {
+          ipcRenderer.invoke("select-folder", "storybook").then((result) => {
             if (!result.canceled) {
               document.getElementById("storybook-path").value =
                 result.filePaths[0];

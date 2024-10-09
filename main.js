@@ -44,9 +44,10 @@ app.on("before-quit", () => {
   Object.values(servers).forEach((server) => server.close());
 });
 
-ipcMain.handle("select-folder", async () => {
+ipcMain.handle("select-folder", async (event, type) => {
   const result = await dialog.showOpenDialog({
     properties: ["openDirectory"],
+    defaultPath: path.join(__dirname, type),
   });
   return result;
 });
