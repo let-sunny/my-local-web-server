@@ -1,4 +1,11 @@
-const { app, BrowserWindow, ipcMain, dialog, shell } = require("electron");
+const {
+  app,
+  nativeImage,
+  BrowserWindow,
+  ipcMain,
+  dialog,
+  shell,
+} = require("electron");
 const path = require("path");
 const http = require("http");
 const fs = require("fs");
@@ -10,7 +17,7 @@ function createWindow() {
     width: 400,
     height: 500,
     resizable: false, // Make the window non-resizable
-    icon: path.join(__dirname, "assets", "icon.png"),
+    icon: path.join(__dirname, "assets", "icon@2x.icns"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       nodeIntegration: true,
@@ -76,3 +83,6 @@ ipcMain.on("stop-server", (event, name) => {
 ipcMain.on("open-browser", (event, url) => {
   shell.openExternal(url);
 });
+
+const image = nativeImage.createFromPath(app.getAppPath() + "/assets/icon.png");
+app.dock.setIcon(image);
